@@ -1,5 +1,7 @@
 disnake==2.7.0
+alembic==1.9.4
 asyncpg==0.25.0
+sqlalchemy==2.0.4
 rapidfuzz==1.9.1
 parsedatetime==2.6
 python-Levenshtein==0.12.2

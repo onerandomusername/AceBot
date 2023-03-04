@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS config (
 	id 					SERIAL UNIQUE,
 	guild_id 			BIGINT UNIQUE NOT NULL,
 	prefix 				VARCHAR(8) NULL,
-	mod_role_id			BIGINT NULL
+	mod_role_id			BIGINT NULL,
+	PRIMARY KEY (id)
 );
 
 -- moderation values
@@ -48,7 +49,9 @@ CREATE TABLE IF NOT EXISTS mod_config (
 
 	raid				BOOLEAN NOT NULL DEFAULT FALSE,
 	raid_age			INTERVAL NULL,
-	raid_default_avatar	BOOLEAN NOT NULL DEFAULT FALSE
+	raid_default_avatar	BOOLEAN NOT NULL DEFAULT FALSE,
+	PRIMARY KEY (id)
+
 );
 
 CREATE TABLE IF NOT EXISTS mod_timer (
@@ -66,7 +69,8 @@ CREATE TABLE IF NOT EXISTS mod_timer (
 	reason		TEXT NULL,
 	userdata	JSON NULL,
 
-	completed	BOOLEAN NOT NULL DEFAULT FALSE
+	completed	BOOLEAN NOT NULL DEFAULT FALSE,
+	PRIMARY KEY (id)
 );
 
 -- highlighter languages
@@ -75,7 +79,8 @@ CREATE TABLE IF NOT EXISTS highlight_lang (
 	guild_id	BIGINT NOT NULL,
 	user_id		BIGINT NOT NULL DEFAULT 0,
 	lang		VARCHAR(32) NOT NULL,
-	UNIQUE 		(guild_id, user_id)
+	UNIQUE 		(guild_id, user_id),
+	PRIMARY KEY (id)
 );
 
 -- highlighter messages
@@ -84,7 +89,8 @@ CREATE TABLE IF NOT EXISTS highlight_msg (
 	guild_id	BIGINT NOT NULL,
 	channel_id	BIGINT NOT NULL,
 	user_id		BIGINT NOT NULL,
-	message_id	BIGINT NOT NULL
+	message_id	BIGINT NOT NULL,
+	PRIMARY KEY (id)
 );
 
 -- starboard config
@@ -94,7 +100,8 @@ CREATE TABLE IF NOT EXISTS starboard (
 	channel_id	BIGINT NULL,
 	locked		BOOLEAN NOT NULL DEFAULT FALSE,
 	threshold	SMALLINT NULL,
-	minimum		SMALLINT NULL
+	minimum		SMALLINT NULL,
+	PRIMARY KEY (id)
 );
 
 -- starmessage
@@ -106,7 +113,8 @@ CREATE TABLE IF NOT EXISTS star_msg (
 	message_id		BIGINT UNIQUE NOT NULL,
 	star_message_id	BIGINT NULL,
 	starred_at		TIMESTAMP NOT NULL,
-	starrer_id		BIGINT NOT NULL
+	starrer_id		BIGINT NOT NULL,
+	PRIMARY KEY (id)
 );
 
 -- starrers
@@ -114,13 +122,15 @@ CREATE TABLE IF NOT EXISTS starrers (
 	id 			SERIAL UNIQUE,
 	star_id		INTEGER NOT NULL REFERENCES star_msg (id) ON DELETE CASCADE,
 	user_id		BIGINT NOT NULL,
-	UNIQUE 		(star_id, user_id)
+	UNIQUE 		(star_id, user_id),
+	PRIMARY KEY (id)
 );
 
 -- fact list
 CREATE TABLE IF NOT EXISTS facts (
 	id 			SERIAL UNIQUE,
-	content		TEXT NOT NULL
+	content		TEXT NOT NULL,
+	PRIMARY KEY (id)
 );
 
 -- tag list
@@ -134,7 +144,8 @@ CREATE TABLE IF NOT EXISTS tag (
 	created_at	TIMESTAMP NOT NULL,
 	edited_at	TIMESTAMP NULL,
 	viewed_at	TIMESTAMP NULL,
-	content		VARCHAR(2000) NOT NULL
+	content		VARCHAR(2000) NOT NULL,
+	PRIMARY KEY (id)
 );
 
 -- command log
@@ -145,7 +156,8 @@ CREATE TABLE IF NOT EXISTS log (
 	user_id		BIGINT NOT NULL,
 	timestamp	TIMESTAMP NOT NULL,
 	command		TEXT NOT NULL,
-	type		command_type NOT NULL
+	type		command_type NOT NULL,
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS remind (
@@ -156,7 +168,8 @@ CREATE TABLE IF NOT EXISTS remind (
 	message_id	BIGINT NULL,
 	made_on		TIMESTAMP NOT NULL,
 	remind_on	TIMESTAMP NOT NULL,
-	message		TEXT
+	message		TEXT,
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS welcome (
@@ -164,7 +177,8 @@ CREATE TABLE IF NOT EXISTS welcome (
 	guild_id	BIGINT UNIQUE NOT NULL,
 	channel_id	BIGINT,
 	enabled		BOOLEAN NOT NULL DEFAULT TRUE,
-	content		VARCHAR(1024)
+	content		VARCHAR(1024),
+	PRIMARY KEY (id)
 );
 
 -- docs stuff
@@ -174,19 +188,22 @@ CREATE TABLE IF NOT EXISTS docs_entry (
 	link		TEXT UNIQUE,
 	page		TEXT NULL,
 	fragment	TEXT NULL,
-	title		TEXT NOT NULL
+	title		TEXT NOT NULL,
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS docs_name (
 	id			SERIAL UNIQUE,
 	docs_id		INT REFERENCES docs_entry (id) NOT NULL,
-	name		TEXT UNIQUE NOT NULL
+	name		TEXT UNIQUE NOT NULL,
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS docs_syntax (
 	id			SERIAL UNIQUE,
 	docs_id		INT REFERENCES docs_entry (id) NOT NULL,
-	syntax		TEXT NOT NULL
+	syntax		TEXT NOT NULL,
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS role (
@@ -194,7 +211,8 @@ CREATE TABLE IF NOT EXISTS role (
 	guild_id	BIGINT UNIQUE NOT NULL,
 	channel_id	BIGINT NULL,
 	message_ids	BIGINT[8] NOT NULL DEFAULT ARRAY[]::BIGINT[8],
-	selectors	INTEGER[8] NOT NULL DEFAULT ARRAY[]::INTEGER[8]
+	selectors	INTEGER[8] NOT NULL DEFAULT ARRAY[]::INTEGER[8],
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS role_selector (
@@ -204,7 +222,8 @@ CREATE TABLE IF NOT EXISTS role_selector (
 	description	VARCHAR(1024) NULL,
 	icon		VARCHAR(256) NULL,
 	inline		BOOLEAN NOT NULL DEFAULT TRUE,
-	roles		INTEGER[25] NOT NULL DEFAULT ARRAY[]::INTEGER[25]
+	roles		INTEGER[25] NOT NULL DEFAULT ARRAY[]::INTEGER[25],
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS role_entry (
@@ -213,7 +232,8 @@ CREATE TABLE IF NOT EXISTS role_entry (
 	role_id		BIGINT UNIQUE NOT NULL,
 	emoji		VARCHAR(56) NOT NULL,
 	name		VARCHAR(199) NOT NULL,
-	description	VARCHAR(1024) NOT NULL
+	description	VARCHAR(1024) NOT NULL,
+	PRIMARY KEY (id)
 );
 
 
@@ -224,7 +244,8 @@ CREATE TABLE IF NOT EXISTS trivia (
 	correct_count	INT NOT NULL DEFAULT 0,
 	wrong_count		INT NOT NULL DEFAULT 0,
 	score			BIGINT NOT NULL DEFAULT 0,
-	UNIQUE			(guild_id, user_id)
+	UNIQUE			(guild_id, user_id),
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS trivia_stats (
@@ -233,12 +254,6 @@ CREATE TABLE IF NOT EXISTS trivia_stats (
 	user_id			BIGINT NOT NULL,
 	timestamp		TIMESTAMP NOT NULL,
 	question_hash	BIGINT NOT NULL,
-	result			BOOL NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS help_claim (
-	guild_id		BIGINT NOT NULL,
-	channel_id		BIGINT NOT NULL,
-	user_id			BIGINT NOT NULL,
-	UNIQUE			(guild_id, channel_id)
+	result			BOOL NOT NULL,
+	PRIMARY KEY (id)
 );
