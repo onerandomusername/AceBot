@@ -5,12 +5,14 @@ import disnake
 import emoji
 from disnake.ext import commands
 
+from utils.context import AceContext
+
 from .fakeuser import FakeUser
 
 empty = Parameter.empty
 
 
-def param_name(converter, ctx):
+def param_name(converter, ctx: AceContext):
     fallback = "Argument"
 
     for param_name, parameter in ctx.command.params.items():
@@ -25,7 +27,7 @@ def param_name(converter, ctx):
     return fallback
 
 
-def _make_int(converter, ctx, argument):
+def _make_int(converter, ctx: AceContext, argument):
     try:
         return int(argument)
     except ValueError:
@@ -34,7 +36,7 @@ def _make_int(converter, ctx, argument):
 
 
 class MaybeMemberConverter(commands.MemberConverter):
-    async def resolve_id(self, ctx, member_id):
+    async def resolve_id(self, ctx: AceContext, member_id):
         member = ctx.guild.get_member(member_id)
         if member is not None:
             return member
@@ -44,7 +46,7 @@ class MaybeMemberConverter(commands.MemberConverter):
         except disnake.HTTPException:
             return FakeUser(member_id, ctx.guild)
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: AceContext, argument):
         try:
             return await super().convert(ctx, argument)
         except commands.BadArgument as exc:
@@ -61,7 +63,7 @@ class MaybeMemberConverter(commands.MemberConverter):
 
 
 class EmojiConverter(commands.Converter):
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: AceContext, argument):
         guild_emojis = list(str(e) for e in ctx.guild.emojis)
 
         if argument not in emoji.UNICODE_EMOJI["en"]:
@@ -72,10 +74,10 @@ class EmojiConverter(commands.Converter):
 
 
 class MaxValueConverter(commands.Converter):
-    def __init__(self, _max):
+    def __init__(self, _max) -> None:
         self.max = _max
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: AceContext, argument):
         value = _make_int(self, ctx, argument)
 
         if value > self.max:
@@ -88,7 +90,7 @@ class MaxValueConverter(commands.Converter):
 class SerialConverter(commands.Converter):
     MAX = pow(2, 31) - 1
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: AceContext, argument):
         value = _make_int(self, ctx, argument)
 
         if value > self.MAX:
@@ -99,15 +101,15 @@ class SerialConverter(commands.Converter):
 
 
 class RangeConverter(commands.Converter):
-    def __init__(self, min, max):
+    def __init__(self, min, max) -> None:
         self.min = min
         self.max = max
 
-    def _make_error(self, ctx):
+    def _make_error(self, ctx: AceContext):
         name = param_name(self, ctx)
         return commands.BadArgument(f"{name} must be between {self.min} and {self.max}")
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: AceContext, argument):
         value = _make_int(self, ctx, argument)
 
         if value < self.min:
@@ -120,17 +122,17 @@ class RangeConverter(commands.Converter):
 
 
 class LengthConverter(commands.Converter):
-    def __init__(self, min=1, max=32):
+    def __init__(self, min: int = 1, max: int = 32) -> None:
         self.min = min
         self.max = max
 
-    def _make_error(self, ctx):
+    def _make_error(self, ctx: AceContext):
         name = param_name(self, ctx)
         return commands.BadArgument(
             f"{name} must be between {self.min} and {self.max} characters."
         )
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: AceContext, argument):
         length = len(argument)
 
         if length < self.min:
@@ -143,10 +145,10 @@ class LengthConverter(commands.Converter):
 
 
 class MaxLengthConverter(commands.Converter):
-    def __init__(self, max=32):
+    def __init__(self, max: int = 32) -> None:
         self.max = max
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: AceContext, argument):
         length = len(argument)
 
         if length > self.max:

@@ -1,14 +1,13 @@
 import asyncio
 import logging
 
-
 log = logging.getLogger(__name__)
 
 
 class ConfigTableRecord(object):
     _data = dict()
 
-    def __init__(self, config, record):
+    def __init__(self, config, record) -> None:
         self._config = config
         self._data = dict()
         self._dirty = set()
@@ -20,13 +19,13 @@ class ConfigTableRecord(object):
         if key in self._data:
             return self._data[key]
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key, value) -> None:
         if key in self._data:
             self.set(key, value)
         else:
             self.__dict__[key] = value
 
-    def _build_dirty(self, start_at=1):
+    def _build_dirty(self, start_at: int = 1):
         return ", ".join(
             "{} = ${}".format(key, idx + start_at)
             for idx, key in enumerate(self._dirty)
@@ -39,7 +38,7 @@ class ConfigTableRecord(object):
             )
         self._dirty.add(key)
 
-    def _clear_dirty(self):
+    def _clear_dirty(self) -> None:
         self._dirty.clear()
 
     def get(self, key):
@@ -77,7 +76,7 @@ class ConfigTableRecord(object):
 
 
 class ConfigTable:
-    def __init__(self, bot, table, primary, record_class=None):
+    def __init__(self, bot, table, primary, record_class=None) -> None:
         record_class = record_class or ConfigTableRecord
 
         if record_class is not ConfigTableRecord and not issubclass(
@@ -101,7 +100,7 @@ class ConfigTable:
 
         log.debug("Constructed ConfigTable for table %s with keys %s", table, primary)
 
-    def build_predicate(self, start_at=1):
+    def build_predicate(self, start_at: int = 1):
         return " AND ".join(
             "{} = ${}".format(key, idx + start_at)
             for idx, key in enumerate(self.primary)
@@ -111,7 +110,7 @@ class ConfigTable:
         return tuple(record.get(primary) for primary in self.primary)
 
     @property
-    def _insert_query(self):
+    def _insert_query(self) -> str:
         return "INSERT INTO {} ({}) VALUES ({})".format(
             self.table,
             ", ".join(self.primary),
@@ -131,7 +130,7 @@ class ConfigTable:
 
         return entry
 
-    async def get_entry(self, *keys, construct=True):
+    async def get_entry(self, *keys, construct: bool = True):
         keys = tuple(keys)
 
         for key in keys:
@@ -163,7 +162,7 @@ class ConfigTable:
 
             return await self.insert_record(record, keys=keys)
 
-    def has_entry(self, *keys):
+    def has_entry(self, *keys) -> bool:
         return tuple(keys) in self.entries
 
     async def clear_entry(self, *keys):

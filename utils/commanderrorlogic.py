@@ -1,12 +1,16 @@
 import traceback
 from datetime import datetime
 from pprint import saferepr
+from types import TracebackType
+from typing import Optional, Type
 
 import disnake
 
+from utils.context import AceContext
+
 
 class CommandErrorLogic:
-    def __init__(self, ctx, exc):
+    def __init__(self, ctx: AceContext, exc) -> None:
         self.bot = ctx.bot
         self.ctx = ctx
         self.exc = exc
@@ -17,7 +21,12 @@ class CommandErrorLogic:
     async def __aenter__(self):
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ):
         # if an error was never set, do nothing
         if self.embed is None:
             return
@@ -69,10 +78,10 @@ class CommandErrorLogic:
         else:
             return content + "here: <{0}>".format(support_link)
 
-    def set(self, **kwargs):
+    def set(self, **kwargs) -> None:
         self.embed = self.new_embed(**kwargs)
 
-    def oops(self):
+    def oops(self) -> None:
         desc = (
             "An exception occured while processing the command.\n"
             "My developer has been notified and the issue will hopefully be fixed soon!"

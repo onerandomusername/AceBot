@@ -1,9 +1,4 @@
-from datetime import datetime
-
-from utils.time import pretty_datetime
-
-
-def shorten(text, max_char=2000):
+def shorten(text: str, max_char: int = 2000):
     """Shortens text to fit within max_chars and max_newline."""
 
     if max_char < 16:
@@ -21,7 +16,7 @@ def shorten(text, max_char=2000):
     return text + " ..."
 
 
-def po(obj):
+def po(obj) -> str:
     try:
         name = str(obj)
     except:

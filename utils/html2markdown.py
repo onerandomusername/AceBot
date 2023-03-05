@@ -1,4 +1,5 @@
 import re
+
 from bs4 import BeautifulSoup, NavigableString
 
 PREPEND = dict(
@@ -34,11 +35,11 @@ class CreditsEmpty(Exception):
 
 
 class Result:
-    def __init__(self, credits):
+    def __init__(self, credits) -> None:
         self.credits = credits
         self.content = ""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.content
 
     def consume(self, amount: int):
@@ -47,13 +48,13 @@ class Result:
 
         self.credits -= amount
 
-    def feed(self, amount: int):
+    def feed(self, amount: int) -> None:
         self.credits += amount
 
-    def can_afford(self, string):
+    def can_afford(self, string: str):
         return len(string) <= self.credits
 
-    def ensure_spacing(self, spacing=2):
+    def ensure_spacing(self, spacing: int = 2) -> None:
         while self.content.endswith("\n" * (spacing + 1)):
             self.content = self.content[:-1]
             self.feed(1)
@@ -62,10 +63,10 @@ class Result:
             self.content += "\n"
             self.consume(1)
 
-    def add(self, string):
+    def add(self, string: str) -> None:
         self.content += string
 
-    def add_and_consume(self, string, trunc=False):
+    def add_and_consume(self, string: str, trunc: bool = False):
         to_consume = len(string)
         do_raise = False
 
@@ -83,8 +84,13 @@ class Result:
 
 class HTML2Markdown:
     def __init__(
-        self, escaper=None, big_box=False, lang=None, max_len=2000, base_url=None
-    ):
+        self,
+        escaper=None,
+        big_box: bool = False,
+        lang=None,
+        max_len: int = 2000,
+        base_url=None,
+    ) -> None:
         self.result = None
         self.escaper = escaper
         self.max_len = max_len
@@ -180,7 +186,7 @@ class HTML2Markdown:
                     else:
                         self.result.add_and_consume(back)
 
-    def navigable_string(self, node):
+    def navigable_string(self, node) -> None:
         content = str(node)
         if content == "\n":
             return
@@ -204,7 +210,7 @@ class HTML2Markdown:
 
         return content
 
-    def codebox(self, tag):
+    def codebox(self, tag) -> None:
         front, back = self._codebox_wraps()
 
         # specific fix for autohotkey rss
@@ -221,7 +227,7 @@ class HTML2Markdown:
             "\n```\n" if self.big_box else "`",
         )
 
-    def link(self, tag):
+    def link(self, tag) -> None:
         credits = self.result.credits
 
         link = self._format_link(tag["href"])

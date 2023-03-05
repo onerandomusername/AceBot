@@ -19,7 +19,8 @@ from rapidfuzz import fuzz, process
 from cogs.mixins import AceMixin
 from config import CLOUDAHK_PASS, CLOUDAHK_URL, CLOUDAHK_USER, GAME_PRED_URL
 from ids import *
-from utils.docs_parser import parse_docs, DOCS_URL
+from utils.context import AceContext
+from utils.docs_parser import DOCS_URL, parse_docs
 from utils.html2markdown import HTML2Markdown
 from utils.string import shorten
 
@@ -302,7 +303,7 @@ class AutoHotkey(AceMixin, commands.Cog):
 
     @commands.command(name="docs", aliases=["d", "doc", "rtfm"])
     @commands.bot_has_permissions(embed_links=True)
-    async def cmd_docs(self, ctx: commands.Context, *, query: str = None):
+    async def cmd_docs(self, ctx: AceContext, *, query: str = None):
         """Search the AutoHotkey documentation. Enter multiple queries by separating with commas."""
 
         if query is None:

@@ -1,10 +1,9 @@
 from math import ceil
+from typing import Union
 
 import disnake
-from typing import TYPE_CHECKING, Union
 
-if TYPE_CHECKING:
-    from disnake.ext import commands
+from utils.context import AceContext
 
 FIRST_LABEL = "First page"
 LAST_LABEL = "Last page"
@@ -23,11 +22,11 @@ HELP_EMOJI = "\N{WHITE QUESTION MARK ORNAMENT}"
 class Pager(disnake.ui.View):
     def __init__(
         self,
-        ctx: Union[disnake.AppCommandInteraction, "commands.Context"],
+        ctx: Union[disnake.AppCommandInteraction, "AceContext"],
         entries=None,
-        per_page=6,
+        per_page: int = 6,
         timeout=60.0 * 15,
-    ):
+    ) -> None:
         super().__init__(timeout=timeout)
 
         self.ctx = ctx
@@ -40,7 +39,7 @@ class Pager(disnake.ui.View):
 
         self.__buttons = None
 
-    async def go(self, at_page=0):
+    async def go(self, at_page: int = 0) -> None:
         if isinstance(self.ctx, disnake.Interaction):
             meth = (
                 self.ctx.followup.send
@@ -57,7 +56,7 @@ class Pager(disnake.ui.View):
 
         self.message = await meth(**kwargs)
 
-    async def init(self, at_page=0):
+    async def init(self, at_page: int = 0):
         self.embed = await self.create_base_embed()
         await self.try_page(at_page)
 
@@ -92,7 +91,7 @@ class Pager(disnake.ui.View):
     def top_page(self):
         return ceil(len(self.entries) / self.per_page) - 1
 
-    async def try_page(self, page):
+    async def try_page(self, page) -> None:
         if not 0 <= page <= self.top_page:
             return
 
@@ -128,7 +127,7 @@ class Pager(disnake.ui.View):
     )
     async def prev_page(
         self, button: disnake.ui.Button, inter: disnake.MessageInteraction
-    ):
+    ) -> None:
         await self.try_page(self.page - 1)
         await inter.response.edit_message(embed=self.embed, view=self)
 
@@ -137,7 +136,7 @@ class Pager(disnake.ui.View):
     )
     async def next_page(
         self, button: disnake.ui.Button, inter: disnake.MessageInteraction
-    ):
+    ) -> None:
         await self.try_page(self.page + 1)
         await inter.response.edit_message(embed=self.embed, view=self)
 
@@ -146,7 +145,7 @@ class Pager(disnake.ui.View):
     )
     async def first_page(
         self, button: disnake.ui.Button, inter: disnake.MessageInteraction
-    ):
+    ) -> None:
         await self.try_page(0)
         await inter.response.edit_message(embed=self.embed, view=self)
 
@@ -155,7 +154,7 @@ class Pager(disnake.ui.View):
     )
     async def last_page(
         self, button: disnake.ui.Button, inter: disnake.MessageInteraction
-    ):
+    ) -> None:
         await self.try_page(self.top_page)
         await inter.response.edit_message(embed=self.embed, view=self)
 
@@ -164,6 +163,6 @@ class Pager(disnake.ui.View):
     )
     async def stop_pager(
         self, button: disnake.ui.Button, inter: disnake.MessageInteraction
-    ):
+    ) -> None:
         await inter.response.edit_message(view=None)
         self.stop()

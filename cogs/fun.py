@@ -7,7 +7,6 @@ from json import loads
 from random import choice
 
 import aiohttp
-import bs4
 import disnake
 from bs4 import BeautifulSoup
 from disnake.ext import commands, tasks
@@ -15,7 +14,6 @@ from rapidfuzz import process
 
 from cogs.mixins import AceMixin
 from config import APIXU_KEY, THECATAPI_KEY, WOLFRAM_KEY
-from utils.time import pretty_timedelta
 
 QUERY_ERROR = commands.CommandError("Query failed, try again later.")
 

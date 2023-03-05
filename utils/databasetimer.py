@@ -1,12 +1,11 @@
 import asyncio
-import disnake
-import asyncpg
 import logging
-
 from datetime import datetime, timedelta
 
-from utils.time import pretty_timedelta
+import asyncpg
+import disnake
 
+from utils.time import pretty_timedelta
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ log = logging.getLogger(__name__)
 class DatabaseTimer:
     MAX_SLEEP = timedelta(days=40)
 
-    def __init__(self, bot, event_name):
+    def __init__(self, bot, event_name: str) -> None:
         self.bot = bot
         self.event_name = event_name
 
@@ -24,11 +23,11 @@ class DatabaseTimer:
     def start_task(self):
         return self.bot.loop.create_task(self.dispatch())
 
-    def restart_task(self):
+    def restart_task(self) -> None:
         self.task.cancel()
         self.task = self.start_task()
 
-    async def dispatch(self):
+    async def dispatch(self) -> None:
         # don't run timer before bot is ready
         await self.bot.wait_until_ready()
 
@@ -87,20 +86,20 @@ class DatabaseTimer:
     def when(self, record):
         raise NotImplementedError
 
-    def maybe_restart(self, dt):
+    def maybe_restart(self, dt) -> None:
         if self.record is None:
             self.restart_task()
 
         elif dt < self.when(self.record):
             self.restart_task()
 
-    def restart_if(self, pred):
+    def restart_if(self, pred) -> None:
         if self.record is None or pred(self.record):
             self.restart_task()
 
 
 class ColumnTimer(DatabaseTimer):
-    def __init__(self, bot, event_name, table, column):
+    def __init__(self, bot, event_name: str, table, column) -> None:
         super().__init__(bot, event_name)
         self.table = table
         self.column = column
@@ -113,7 +112,7 @@ class ColumnTimer(DatabaseTimer):
             datetime.utcnow() + self.MAX_SLEEP,
         )
 
-    async def cleanup_record(self, record):
+    async def cleanup_record(self, record) -> None:
         await self.bot.db.execute(
             "DELETE FROM {0} WHERE id=$1".format(self.table), record.get("id")
         )

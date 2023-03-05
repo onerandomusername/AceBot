@@ -1,10 +1,10 @@
-import os
 import json
-import shutil
-import aiohttp
 import logging
-
+import os
+import shutil
 from zipfile import ZipFile
+
+import aiohttp
 
 from .handlers import *
 
@@ -27,7 +27,7 @@ ALIASES = {
 
 
 class DocsAggregator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.force_names = list()
         self.fill_names = list()
         self.entries = list()
@@ -36,7 +36,7 @@ class DocsAggregator:
         for entry in self.entries:
             yield entry
 
-    def name_check(self, orig_name, force=False):
+    def name_check(self, orig_name: str, force: bool = False) -> bool:
         name = orig_name.lower()
 
         if name in self.force_names:
@@ -69,13 +69,13 @@ class DocsAggregator:
 
         return None
 
-    def treat_name(self, name):
+    def treat_name(self, name: str):
         if name.endswith("()"):
             return name[:-2]
 
         return name
 
-    def add_entry(self, entry):
+    def add_entry(self, entry) -> None:
         if entry.get("desc", None) is None:
             return
 
@@ -202,7 +202,7 @@ def build_docs():
     return aggregator
 
 
-async def parse_docs(on_update, fetch=True, loop=None):
+async def parse_docs(on_update, fetch: bool = True, loop=None):
     if fetch:
         await on_update("Downloading...")
 

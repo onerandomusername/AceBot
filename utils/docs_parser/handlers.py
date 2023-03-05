@@ -1,11 +1,11 @@
-import disnake
 import re
-
-from bs4 import BeautifulSoup, NavigableString
 from enum import Enum
+from typing import Optional, Sequence
+
+import disnake
+from bs4 import BeautifulSoup, NavigableString
 
 from utils.html2markdown import HTML2Markdown
-
 
 MULTIPLE_NAME_RE = re.compile(r".*\[.*].*")
 HEADER_RE = re.compile(r"^h\d$")
@@ -31,7 +31,9 @@ class BaseParser:
     DOCS_FOLDER = None
     PARSER = "lxml"
 
-    def __init__(self, page, prefix=None, postfix=None, ignores=None):
+    def __init__(
+        self, page, prefix: Optional[str] = None, postfix=None, ignores=None
+    ) -> None:
         self.page = page
         self.prefix = prefix or ""
         self.postfix = postfix or ""
@@ -49,10 +51,17 @@ class BaseParser:
         with open("{}/{}".format(self.DOCS_FOLDER, self.page), "r") as f:
             self.bs = BeautifulSoup(f.read(), self.PARSER)
 
-    def _set_prefix_and_prepend(self, name):
+    def _set_prefix_and_prepend(self, name: str):
         return self.prefix + name + self.postfix
 
-    def add(self, fill_names=None, force_names=None, page=None, desc=None, syntax=None):
+    def add(
+        self,
+        fill_names: Optional[Sequence[str]] = None,
+        force_names: Optional[Sequence[str]] = None,
+        page=None,
+        desc: Optional[str] = None,
+        syntax=None,
+    ) -> None:
         # if page is None:
         # 	raise ValueError('Page is none for names ', fill_names, force_names)
 
@@ -78,14 +87,14 @@ class BaseParser:
             syntax=syntax,
         )
 
-    def add_force(self, **kwargs):
+    def add_force(self, **kwargs) -> None:
         self.entries.append(dict(**kwargs))
 
     def run(self):
         self.go()
         return self.entries
 
-    def add_page_entry(self):
+    def add_page_entry(self) -> None:
         header = self.bs.find("h1")
         if header is None:
             return
@@ -165,25 +174,25 @@ class BaseParser:
         return content
 
     @staticmethod
-    def remove_versioning(tag):
+    def remove_versioning(tag) -> None:
         for span in tag.find_all("span", class_="ver"):
             span.decompose()
 
     @staticmethod
-    def remove_headnote(tag):
+    def remove_headnote(tag) -> None:
         for span in tag.find_all("span", class_="headnote"):
             span.decompose()
 
-    def handle_optional(self, tag):
+    def handle_optional(self, tag) -> None:
         for span in tag.find_all("span", class_="optional"):
             span.replace_with("[{}]".format(self.as_string(span)))
 
     @staticmethod
-    def convert_brs(tag):
+    def convert_brs(tag) -> None:
         for br in tag.find_all("br"):
             br.replace_with("\n")
 
-    def _string_as_names(self, name):
+    def _string_as_names(self, name: str):
         names = [name]
         splits = [" or ", " / ", "\n"]
 
@@ -272,7 +281,7 @@ class BaseParser:
 
         all_tag_name = use_on_tag_name + stop_on_tag_name
 
-        def pred(pred_tag):
+        def pred(pred_tag) -> bool:
             return pred_tag.name in all_tag_name
 
         def tag_process(current_tag):
@@ -300,10 +309,10 @@ class BaseParser:
         self.search(tag, pred, tag_process)
         return desc, syntax
 
-    def search(self, tag, pred, on_found, max_depth=5):
+    def search(self, tag, pred, on_found, max_depth: int = 5) -> None:
         self._search_meta([tag, *list(tag.next_siblings)], pred, on_found, max_depth, 0)
 
-    def _search_meta(self, tags, pred, on_found, max_depth, current_depth):
+    def _search_meta(self, tags, pred, on_found, max_depth, current_depth) -> None:
         new_tags = list()
 
         for tag in tags:
@@ -339,7 +348,7 @@ class BaseParser:
 
 
 class HeadersParser(BaseParser):
-    def handle(self, id, tag):
+    def handle(self, id, tag) -> None:
         names = self.tag_as_names(tag)
         desc, syntax = self.get_desc_and_syntax(tag)
 
@@ -350,7 +359,7 @@ class HeadersParser(BaseParser):
             syntax=syntax,
         )
 
-    def go(self):
+    def go(self) -> None:
         self.add_page_entry()
 
         for tag in self.bs.find_all(HEADER_RE, id=True):
@@ -358,7 +367,7 @@ class HeadersParser(BaseParser):
 
 
 class CommandParser(HeadersParser):
-    def add_page_entry(self):
+    def add_page_entry(self) -> None:
         body = self.bs.find("body")
 
         header = body.find("h1")
@@ -372,7 +381,7 @@ class CommandParser(HeadersParser):
 
 
 class VariablesParser(BaseParser):
-    def go(self):
+    def go(self) -> None:
         for tr in self.bs.find_all("tr"):
             first = True
             names, desc = None, None
@@ -398,7 +407,7 @@ class VariablesParser(BaseParser):
 
 
 class MethodListParser(BaseParser):
-    def go(self):
+    def go(self) -> None:
         self.add_page_entry()
 
         for tag in self.bs.find_all("div", id=True):
@@ -417,7 +426,7 @@ class MethodListParser(BaseParser):
 
 
 class EnumeratorParser(HeadersParser):
-    def go(self):
+    def go(self) -> None:
         self.add_page_entry()
 
         for tag in self.bs.find_all("h2", id=True):
@@ -425,14 +434,14 @@ class EnumeratorParser(HeadersParser):
 
 
 class GuiControlParser(HeadersParser):
-    def _set_prefix_and_prepend(self, name):
+    def _set_prefix_and_prepend(self, name: str):
         if " " in name or "_" in name:
             return name
         return super()._set_prefix_and_prepend(name)
 
 
 class DocsHTML2Markdown(HTML2Markdown):
-    def codebox(self, tag):
+    def codebox(self, tag) -> None:
         if tag.name == "pre":
             old_bigbox = self.big_box
             self.big_box = True

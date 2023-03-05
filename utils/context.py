@@ -1,5 +1,5 @@
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import disnake
 from disnake.ext import commands
@@ -15,7 +15,7 @@ PROMPT_REQUIRED_PERMS = ("embed_links",)
 PROMPT_EMOJIS = ("\N{WHITE HEAVY CHECK MARK}", "\N{CROSS MARK}")
 
 
-async def is_mod_pred(ctx):
+async def is_mod_pred(ctx: "AceContext"):
     return await ctx.is_mod()
 
 
@@ -23,7 +23,7 @@ def is_mod():
     return commands.check(is_mod_pred)
 
 
-async def can_prompt_pred(ctx):
+async def can_prompt_pred(ctx: "AceContext") -> bool:
     perms = ctx.perms
     missing_perms = list(
         perm for perm in PROMPT_REQUIRED_PERMS if not getattr(perms, perm)
@@ -40,7 +40,7 @@ def can_prompt():
 
 
 class PromptView(disnake.ui.View):
-    def __init__(self, check_user, *args, **kwargs):
+    def __init__(self, check_user, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.check_user = check_user
@@ -49,7 +49,7 @@ class PromptView(disnake.ui.View):
         self.result = False
         self.event = asyncio.Event()
 
-    async def finish(self, message: disnake.Message):
+    async def finish(self, message: disnake.Message) -> None:
         self.event.set()
 
         if message is not None:
@@ -73,20 +73,24 @@ class PromptView(disnake.ui.View):
         emoji="\N{White Heavy Check Mark}",
         style=disnake.ButtonStyle.primary,
     )
-    async def yes(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def yes(
+        self, button: disnake.ui.Button, inter: disnake.MessageInteraction
+    ) -> None:
         self.result = True
         await self.finish(inter.message)
 
     @disnake.ui.button(
         label="Abort", emoji="\N{CROSS MARK}", style=disnake.ButtonStyle.secondary
     )
-    async def no(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def no(
+        self, button: disnake.ui.Button, inter: disnake.MessageInteraction
+    ) -> None:
         self.result = False
         await self.finish(inter.message)
 
 
 class AceContext(commands.Context):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.bot: "AceBot"
 
@@ -103,13 +107,13 @@ class AceContext(commands.Context):
         return self.channel.permissions_for(self.guild.me)
 
     @property
-    def pretty(self):
+    def pretty(self) -> str:
         return "{0.display_name} ({0.id}) in {1.name} ({1.id})".format(
             self.author, self.guild
         )
 
     @property
-    def stamp(self):
+    def stamp(self) -> str:
         return "TIME: {}\nGUILD: {}\nCHANNEL: #{}\nAUTHOR: {}\nMESSAGE ID: {}".format(
             pretty_datetime(self.message.created_at),
             po(self.guild),
@@ -142,7 +146,7 @@ class AceContext(commands.Context):
 
         return bool(disnake.utils.get(member.roles, id=gc.mod_role_id))
 
-    async def send_help(self, command=None):
+    async def send_help(self, command=None) -> None:
         """Convenience method for sending help."""
 
         perms = self.perms
@@ -161,7 +165,9 @@ class AceContext(commands.Context):
 
         await help_cmd.command_callback(self, command=command)
 
-    async def prompt(self, title=None, prompt=None, user_override=None):
+    async def prompt(
+        self, title=None, prompt: Optional[str] = None, user_override=None
+    ):
         """Creates a yes/no prompt."""
 
         perms = self.perms
@@ -187,7 +193,7 @@ class AceContext(commands.Context):
 
         return await view.wait()
 
-    async def admin_prompt(self, raise_on_abort=True):
+    async def admin_prompt(self, raise_on_abort: bool = True):
         result = await self.prompt(
             title="Warning!",
             prompt=(

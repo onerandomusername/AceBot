@@ -7,11 +7,11 @@ from config import DB_BIND
 QUERIES = open("migrate.sql", "r").read()
 
 
-def log(connection, message):
+def log(connection, message) -> None:
     print(message)
 
 
-async def main():
+async def main() -> None:
     db = await asyncpg.connect(DB_BIND)
     db.add_log_listener(log)
 

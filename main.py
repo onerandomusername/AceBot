@@ -66,7 +66,7 @@ def setup():
 
     # misc. monkey-patching
     class Embed(disnake.Embed):
-        def __init__(self, color=disnake.Color.blue(), **attrs):
+        def __init__(self, color=disnake.Color.blue(), **attrs) -> None:
             attrs["color"] = color
             super().__init__(**attrs)
 
@@ -77,10 +77,10 @@ def setup():
             self,
             query,
             args,
-            limit,
+            limit: int,
             timeout,
-            return_status=False,
-            ignore_custom_codec=False,
+            return_status: bool = False,
+            ignore_custom_codec: bool = False,
             record_class=None,
         ):
             log.debug(query)

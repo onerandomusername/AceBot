@@ -1,8 +1,9 @@
 import math
-
-from disnake.ext import commands
 from datetime import datetime, timedelta
 
+from disnake.ext import commands
+
+from utils.context import AceContext
 
 ordinal = lambda n: "%d%s" % (
     n,
@@ -46,7 +47,7 @@ def pretty_seconds(s):
     return pretty_timedelta(timedelta(seconds=s))
 
 
-def pretty_datetime(dt: datetime, ignore_time=False):
+def pretty_datetime(dt: datetime, ignore_time: bool = False) -> str:
     if not isinstance(dt, datetime):
         raise ValueError("datetime expected, '{}' given".format(type(dt)))
 
@@ -57,7 +58,7 @@ def pretty_datetime(dt: datetime, ignore_time=False):
 
 
 class TimeMultConverter(commands.Converter):
-    async def convert(self, ctx, mult):
+    async def convert(self, ctx: AceContext, mult):
         try:
             mult = float(mult)
         except ValueError:
@@ -70,7 +71,7 @@ class TimeMultConverter(commands.Converter):
 
 
 class TimeDeltaConverter(commands.Converter):
-    async def convert(self, ctx, unit):
+    async def convert(self, ctx: AceContext, unit):
         unit = unit.lower()
 
         if unit in ("s", "sec", "secs", "second", "seconds"):

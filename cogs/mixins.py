@@ -1,7 +1,5 @@
 from ace import AceBot
 
-from datetime import datetime
-
 
 class AceMixin:
     def __init__(self, bot: AceBot):

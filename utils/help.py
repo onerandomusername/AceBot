@@ -1,13 +1,14 @@
 import disnake
 from disnake.ext import commands
 
+from utils.context import AceContext
 from utils.pager import Pager
 
 
 class HelpPager(Pager):
     commands_per_page = 8
 
-    def add_page(self, cog_name, cog_desc, commands):
+    def add_page(self, cog_name: str, cog_desc, commands) -> None:
         """Will split into several pages to accommodate the per_page limit."""
 
         # will obviously not run if no commands are in the page
@@ -17,7 +18,7 @@ class HelpPager(Pager):
         ]:
             self.entries.append((cog_name, cog_desc, commands_slice))
 
-    def craft_invite_string(self):
+    def craft_invite_string(self) -> str:
         return "[Enjoying the bot? Invite it to your own server!]({0})".format(
             self.ctx.bot.invite_link
         )
@@ -25,7 +26,7 @@ class HelpPager(Pager):
     async def create_base_embed(self):
         return disnake.Embed()
 
-    async def update_page_embed(self, embed, page, entries):
+    async def update_page_embed(self, embed, page, entries) -> None:
         cog_name, cog_desc, commands = entries[0]
 
         name = f"{cog_name} Commands"
@@ -44,7 +45,7 @@ class HelpPager(Pager):
         for name, value in commands:
             embed.add_field(name=name, value=value, inline=False)
 
-    async def help_embed(self, e):
+    async def help_embed(self, e) -> None:
         e.set_author(
             name="How do I use the bot?", icon_url=self.bot.user.display_avatar.url
         )
@@ -69,7 +70,9 @@ class HelpPager(Pager):
 class PaginatedHelpCommand(commands.HelpCommand):
     """Cog that implements the help command and help pager."""
 
-    async def package_command(self, command, force=False, long_help=False):
+    async def package_command(
+        self, command, force: bool = False, long_help: bool = False
+    ):
         if command.hidden or not command.enabled:
             return None
 
@@ -93,11 +96,11 @@ class PaginatedHelpCommand(commands.HelpCommand):
 
         return self.context.prefix + get_signature(command), help_message
 
-    async def prepare_help_command(self, ctx, command=None):
+    async def prepare_help_command(self, ctx: AceContext, command=None) -> None:
         self.context = ctx
         self.pager = HelpPager(ctx, list(), per_page=1)
 
-    async def add_cog(self, cog: commands.Cog, force=False):
+    async def add_cog(self, cog: commands.Cog, force: bool = False) -> bool:
         cog_name = cog.__class__.__name__
         cog_desc = cog.__doc__
 
@@ -121,20 +124,20 @@ class PaginatedHelpCommand(commands.HelpCommand):
 
         self.pager.add_page(cog_name, cog_desc, commands)
 
-    async def send_bot_help(self, mapping):
+    async def send_bot_help(self, mapping) -> None:
         for cog in mapping:
             if cog is not None:
                 await self.add_cog(cog)
 
         await self.pager.go()
 
-    async def send_cog_help(self, cog):
+    async def send_cog_help(self, cog) -> None:
         if await self.add_cog(cog, force=True):
             return
 
         await self.pager.go()
 
-    async def send_group_help(self, group):
+    async def send_group_help(self, group) -> None:
         cog_name = group.cog_name
 
         if cog_name is not None and group.cog_name.lower() == group.name.lower():
@@ -164,7 +167,7 @@ class PaginatedHelpCommand(commands.HelpCommand):
         self.pager.add_page(group.cog_name, group.cog.__doc__, commands)
         await self.pager.go()
 
-    async def send_command_help(self, command):
+    async def send_command_help(self, command) -> None:
         cog_name = command.cog_name
 
         if cog_name is not None and cog_name.lower() == command.name:
@@ -180,15 +183,15 @@ class PaginatedHelpCommand(commands.HelpCommand):
         self.pager.add_page(cog_name, command.cog.__doc__, [pack])
         await self.pager.go()
 
-    async def stop(self):
+    async def stop(self) -> None:
         await self.send_error_message(
             await self.command_not_found(self.context.kwargs["command"])
         )
 
-    async def command_not_found(self, command_name):
+    async def command_not_found(self, command_name: str):
         return commands.CommandNotFound(command_name)
 
-    async def send_error_message(self, error):
+    async def send_error_message(self, error) -> None:
         if not isinstance(error, commands.CommandNotFound):
             return
 

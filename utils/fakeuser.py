@@ -2,15 +2,15 @@ from disnake import Object
 
 
 class FakeAsset:
-    def __init__(self, url):
+    def __init__(self, url) -> None:
         self.url = url
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.url
 
 
 class FakeUser(Object):
-    def __init__(self, id, guild=None, **data):
+    def __init__(self, id, guild=None, **data) -> None:
         super().__init__(id)
 
         self._guild = guild
@@ -24,7 +24,7 @@ class FakeUser(Object):
         return self._guild
 
     @property
-    def mention(self):
+    def mention(self) -> str:
         return f"<@!{self.id}>"
 
     @property
@@ -55,7 +55,7 @@ class FakeUser(Object):
     def display_avatar(self):
         return self.avatar
 
-    def __str__(self):
+    def __str__(self) -> str:
         name = self.name
         nick = self.nick
         discriminator = self.discriminator

@@ -1,4 +1,3 @@
-import asyncio
 import copy
 import io
 import logging
@@ -6,22 +5,16 @@ import textwrap
 import traceback
 from collections import Counter
 from contextlib import redirect_stdout
-from datetime import datetime, timedelta
-from urllib.parse import urlparse
+from datetime import timedelta
 
 import disnake
-from bs4 import BeautifulSoup
 from disnake.ext import commands
-from disnake.mixins import Hashable
 from tabulate import tabulate
 
 from cogs.mixins import AceMixin
 from config import BOT_ACTIVITY
 from utils.context import AceContext
-from utils.converters import MaxValueConverter
-from utils.pager import Pager
-from utils.string import shorten
-from utils.time import pretty_datetime, pretty_timedelta
+from utils.time import pretty_timedelta
 
 log = logging.getLogger(__name__)
 
@@ -67,6 +60,7 @@ class Owner(AceMixin, commands.Cog):
         """Evaluates some code."""
 
         from pprint import pprint
+
         from tabulate import tabulate
 
         env = {

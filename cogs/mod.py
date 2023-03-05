@@ -14,7 +14,7 @@ from asyncpg.exceptions import UniqueViolationError
 from disnake.ext import commands
 
 from cogs.mixins import AceMixin
-from ids import AHK_GUILD_ID, RULES_MSG_ID, LEVEL_ROLE_IDS
+from ids import AHK_GUILD_ID, LEVEL_ROLE_IDS, RULES_MSG_ID
 from utils.configtable import ConfigTable, ConfigTableRecord
 from utils.context import AceContext, can_prompt, is_mod
 from utils.converters import MaxLengthConverter, MaybeMemberConverter, RangeConverter
