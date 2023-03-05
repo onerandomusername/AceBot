@@ -2,10 +2,12 @@ from datetime import datetime
 from typing import Union
 
 import disnake
+import sqlalchemy as sa
 from disnake.ext import commands
 
 from ace import AceBot
 from cogs.mixins import AceMixin
+from models.logging import CommandType, Log as LogRecord
 from utils.context import AceContext
 from utils.string import po
 
@@ -23,29 +25,31 @@ class InternalLogger(commands.Cog, AceMixin):
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx: AceContext):
-        await self.bot.db.execute(
-            "INSERT INTO log (guild_id, channel_id, user_id, timestamp, command, type) VALUES ($1, $2, $3, $4, $5, $6)",
-            ctx.guild.id,
-            ctx.channel.id,
-            ctx.author.id,
-            datetime.utcnow(),
-            ctx.command.qualified_name,
-            "PREFIX",
-        )
+        async with self.bot.db_session() as session:
+            record = LogRecord(
+                ctx.guild.id,
+                ctx.channel.id,
+                ctx.author.id,
+                datetime.utcnow(),
+                ctx.command.qualified_name,
+                CommandType.PREFIX,
+            )
+            session.add(record)
+            await session.commit()
 
     @commands.Cog.listener()
-    async def on_slash_command_completion(
-        self, inter: disnake.ApplicationCommandInteraction
-    ):
-        await self.bot.db.execute(
-            "INSERT INTO log (guild_id, channel_id, user_id, timestamp, command, type) VALUES ($1, $2, $3, $4, $5, $6)",
-            inter.guild.id,
-            inter.channel.id,
-            inter.author.id,
-            datetime.utcnow(),
-            inter.application_command.qualified_name,
-            "APPLICATION",
-        )
+    async def on_slash_command_completion(self, inter: disnake.ApplicationCommandInteraction):
+        async with self.bot.db_session() as session:
+            record = LogRecord(
+                inter.guild_id,
+                inter.channel_id,
+                inter.author.id,
+                datetime.utcnow(),
+                inter.application_command.qualified_name,
+                CommandType.APPLICATION,
+            )
+            session.add(record)
+            await session.commit()
 
 
 def setup(bot: AceBot):

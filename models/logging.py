@@ -23,4 +23,6 @@ class Log(MappedAsDataclass, Base):
     user_id: Mapped[int] = mapped_column(sa.BigInteger(), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(nullable=False)
     command: Mapped[str] = mapped_column(sa.Text(), nullable=False)
-    type: Mapped[str] = mapped_column(sa.Enum(CommandType, name="command_type"), nullable=False)
+    type: Mapped[CommandType] = mapped_column(
+        sa.Enum(CommandType, name="command_type"), nullable=False
+    )
