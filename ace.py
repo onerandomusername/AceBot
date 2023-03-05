@@ -1,11 +1,19 @@
 import asyncio
+import logging
 import logging.handlers
 import os
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import aiohttp
 import asyncpg
 from disnake.ext import commands
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from config import *
 from utils.configtable import ConfigTable
@@ -14,6 +22,8 @@ from utils.guildconfigrecord import GuildConfigRecord
 from utils.help import PaginatedHelpCommand
 from utils.string import po
 
+if TYPE_CHECKING:
+    from aiohttp import ClientSession
 EXTENSIONS = (
     "cogs.backend.error_handler",
     "cogs.backend.logger",
@@ -40,8 +50,10 @@ EXTENSIONS = (
 class AceBot(commands.Bot):
     support_link = "https://discord.gg/3MsSbRxbKV"
 
-    aiohttp: aiohttp.ClientSession
-    db: asyncpg.pool
+    aiohttp: "ClientSession"
+    db: asyncpg.Pool
+    db_engine: AsyncEngine
+    db_session: async_sessionmaker[AsyncSession]
     config: ConfigTable
     startup_time: datetime
 
@@ -59,6 +71,8 @@ class AceBot(commands.Bot):
 
         # created in login
         self.db = None
+        self.db_engine = None
+        self.db_session = None
 
         self.config = ConfigTable(
             self, table="config", primary="guild_id", record_class=GuildConfigRecord
@@ -184,7 +198,9 @@ class AceBot(commands.Bot):
 
     async def login(self, token: str) -> None:
         self.log.info("Creating postgres pool")
-        self.db = await asyncpg.create_pool(DB_BIND)
+        self.db = await asyncpg.create_pool(DB_BIND.replace("+asyncpg", ""))
+        self.db_engine = engine = create_async_engine(DB_BIND)
+        self.db_session = async_sessionmaker(engine, expire_on_commit=False)
         self.log.info("Loading extensions")
         self.load_extensions()
         self.log.info("Logging in to discord")

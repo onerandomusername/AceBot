@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import logging.handlers
 import os
 
@@ -23,6 +24,8 @@ def setup_logger():
     logging.getLogger("websockets").setLevel(logging.INFO)
     logging.getLogger("asyncpg").setLevel(logging.INFO)
     logging.getLogger("asyncio").setLevel(logging.INFO)
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
+    logging.getLogger("sqlalchemy.pool").setLevel(logging.INFO)
 
     # we want out logging formatted like this everywhere
     fmt = logging.Formatter(
